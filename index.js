@@ -29,6 +29,7 @@
   var sceneListToggleElement = document.querySelector('#sceneListToggle');
   var autorotateToggleElement = document.querySelector('#autorotateToggle');
   var fullscreenToggleElement = document.querySelector('#fullscreenToggle');
+  var gyroToggleElement = document.querySelector('#gyroToggle');
 
   // Detect desktop or mobile mode.
   if (window.matchMedia) {
@@ -178,6 +179,10 @@
   controls.registerMethod('inElement',    new Marzipano.ElementPressControlMethod(viewInElement,  'zoom', -velocity, friction), true);
   controls.registerMethod('outElement',   new Marzipano.ElementPressControlMethod(viewOutElement, 'zoom',  velocity, friction), true);
 
+  // Set up device orientation control method.
+  var deviceOrientationControlMethod = new DeviceOrientationControlMethod();
+  controls.registerMethod('deviceOrientation', deviceOrientationControlMethod);
+
   function sanitize(s) {
     return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;');
   }
@@ -189,6 +194,13 @@
     startAutorotate();
     updateSceneName(scene);
     updateSceneList(scene);
+    if (gyroToggleElement && gyroToggleElement.classList.contains('enabled')) {
+      deviceOrientationControlMethod.getPitch(function(err, pitch) {
+        if (!err && scene.view) {
+          scene.view.setPitch(pitch);
+        }
+      });
+    }
   }
 
   function updateSceneName(scene) {
@@ -242,6 +254,53 @@
       autorotateToggleElement.classList.add('enabled');
       startAutorotate();
     }
+  }
+
+  function enableDeviceOrientation() {
+    deviceOrientationControlMethod.getPitch(function(err, pitch) {
+      if (!err && viewer.view()) {
+        viewer.view().setPitch(pitch);
+      }
+    });
+    controls.enableMethod('deviceOrientation');
+    if (gyroToggleElement) {
+      gyroToggleElement.classList.add('enabled');
+    }
+  }
+
+  function disableDeviceOrientation() {
+    controls.disableMethod('deviceOrientation');
+    if (gyroToggleElement) {
+      gyroToggleElement.classList.remove('enabled');
+    }
+  }
+
+  function toggleDeviceOrientation() {
+    if (gyroToggleElement && gyroToggleElement.classList.contains('enabled')) {
+      disableDeviceOrientation();
+    } else {
+      // Solicitud de permisos requerida en iOS 13+
+      if (typeof window.DeviceOrientationEvent !== 'undefined' &&
+          typeof window.DeviceOrientationEvent.requestPermission === 'function') {
+        window.DeviceOrientationEvent.requestPermission()
+          .then(function(response) {
+            if (response === 'granted') {
+              enableDeviceOrientation();
+            } else {
+              alert('Permiso de giroscopio denegado.');
+            }
+          })
+          .catch(function(err) {
+            console.error('Error al solicitar permiso de giroscopio:', err);
+          });
+      } else {
+        enableDeviceOrientation();
+      }
+    }
+  }
+
+  if (gyroToggleElement) {
+    gyroToggleElement.addEventListener('click', toggleDeviceOrientation);
   }
 
   function createLinkHotspotElement(hotspot) {

@@ -200,6 +200,61 @@ body.fullscreen-enabled.mobile #autorotateToggle {
   display: none;
 }
 
+#gyroToggle {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 40px;
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+  background-color: rgb(103,115,131);
+  background-color: rgba(103,115,131,0.8);
+}
+
+.mobile #gyroToggle {
+  width: 50px;
+  height: 50px;
+  right: 50px;
+}
+
+body.fullscreen-enabled #gyroToggle {
+  right: 80px;
+}
+
+body.fullscreen-enabled.mobile #gyroToggle {
+  right: 100px;
+}
+
+#gyroToggle .icon {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 30px;
+  height: 30px;
+}
+
+.mobile #gyroToggle .icon {
+  top: 10px;
+  right: 10px;
+}
+
+#gyroToggle .icon.on {
+  display: none;
+}
+
+#gyroToggle .icon.off {
+  display: block;
+}
+
+#gyroToggle.enabled .icon.on {
+  display: block;
+}
+
+#gyroToggle.enabled .icon.off {
+  display: none;
+}
+
 #sceneListToggle {
   position: absolute;
   top: 0;
